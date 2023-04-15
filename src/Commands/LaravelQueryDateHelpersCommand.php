@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Frameck\LaravelQueryDateHelpers\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class LaravelQueryDateHelpersCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'laravel-query-date-helpers';
 
     public $description = 'My command';
 
