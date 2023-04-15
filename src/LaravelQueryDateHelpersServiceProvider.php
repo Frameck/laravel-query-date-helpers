@@ -8,6 +8,13 @@ use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class LaravelQueryDateHelpersServiceProvider extends PackageServiceProvider
 {
+    public function boot()
+    {
+        if (config('query-date-helpers.register_macros')) {
+            LaravelQueryDateHelpers::registerMacros();
+        }
+    }
+
     public function configurePackage(Package $package): void
     {
         /*
