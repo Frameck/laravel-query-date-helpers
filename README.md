@@ -24,6 +24,8 @@ php artisan vendor:publish --tag="laravel-query-date-helpers-config"
 This is the contents of the published config file:
 
 ```php
+use Frameck\LaravelQueryDateHelpers\Enums\DateRangeType;
+
 return [
     /**
      * If you want to exclude the current day/week/month/year etc. in the range you could use the exclusive range here as a default.
@@ -41,24 +43,71 @@ return [
      * If you decide to not use the macros, this package provides also a trait that you can use on a specific model.
      */
     'register_macros' => true,
+
+    /**
+     * When using Eloquent the package will use the CREATED_AT column
+     *
+     * @link https://laravel.com/docs/10.x/eloquent#timestamps
+     *
+     * When using Query Builder it uses the column below
+     */
+    'column' => 'created_at',
 ];
 ```
 
 ## Usage
-All the examples in this section assume that the date is April 14, 2023.
-Every method has a `column` parameter as its last, so you can use it in two ways:
-1. `Order::weekToDate(now()->subYear(), 'date')`
-1. `Order::weekToDate(column: 'date')`
+1. Using `'register_macros' => false`
+```php
+use Frameck\LaravelQueryDateHelpers\Traits\HasDateScopes;
+
+class Order extends Model
+{
+    use HasFactory;
+    use HasDateScopes;
+}
+```
+
+2. Using `'register_macros' => true`
+You don't you need any additional configuration since the macro are registered directly on the Eloquent and Query builder.
+If you choose this option you can use all the functions listed below either querying from the model class or from the `DB` facade.
+
+All the examples in this section assume that the date is May 8, 2023.
+Every method has a `column` parameter as its second to last, so you can use it in two ways:
+1. `Order::weekToDate(now()->subYear(), 'date')` passing all parameters
+1. `Order::weekToDate(column: 'date')` with named parameter
 
 Column default:
 - when using `QueryBuilder` is `created_at`
-- when using `EloquentBuilder` it gets the `CREATED_AT` set on the model, and if it doesn't find one it defaults to `created_at`
+- when using `EloquentBuilder` it gets the `CREATED_AT` set on the model, and if it doesn't find one it defaults to the `column` value set in the config
 
+#### BASIC METHODS
+- `yesterday`
+- `today`
+- `tomorrow`
+- `betweenDates`
 ```php
-Order::yesterday(); // select * from `orders` where date(`created_at`) = '2023-04-13'
-Order::today(); // select * from `orders` where date(`created_at`) = '2023-04-14'
-Order::tomorrow(); // select * from `orders` where date(`created_at`) = '2023-04-15'
-Order::betweenDates(now()->startOfMonth(), now()->addMonths(2)); // select * from `orders` where date(`created_at`) >= '2023-04-01' and date(`created_at`) <= '2023-06-14'
+// yesterday, today and tomorrow methods accept the following parameters
+?string $column = null
+
+// betweenDates method accept the following parameters
+?Carbon $dateStart = null,
+?Carbon $dateEnd = null,
+?string $column = null,
+?DateRangeType $dateRangeType = null
+
+// betweenDates method accepts these parameters
+
+// using eloquent builder on Order model
+Order::yesterday(); // select * from `orders` where date(`orders`.`created_at`) = '2023-05-07'
+Order::today(); // select * from `orders` where date(`orders`.`created_at`) = '2023-05-08'
+Order::tomorrow(); // select * from `orders` where date(`orders`.`created_at`) = '2023-05-09'
+Order::betweenDates(now()->startOfMonth(), now()->addMonths(2)); // select * from `orders` where date(`orders`.`created_at`) >= '2023-05-01' and date(`orders`.`created_at`) <= '2023-07-08'
+
+// using query builder on DB facade
+DB::table('orders')->yesterday()->toRawSql(); // select * from `orders` where date(`created_at`) = '2023-05-07'
+DB::table('orders')->today()->toRawSql(); // select * from `orders` where date(`created_at`) = '2023-05-08'
+DB::table('orders')->tomorrow()->toRawSql(); // select * from `orders` where date(`created_at`) = '2023-05-09'
+DB::table('orders')->betweenDates(now()->startOfMonth(), now()->addMonths(2))->toRawSql(); // select * from `orders` where date(`created_at`) >= '2023-05-01' and date(`created_at`) <= '2023-07-08'
 ```
 
 #### TO DATE
@@ -68,14 +117,16 @@ Order::betweenDates(now()->startOfMonth(), now()->addMonths(2)); // select * fro
 - `yearToDate`
 ```php
 // all toDate methods accept the following parameters
-EloquentBuilder|QueryBuilder $builder, ?Carbon $date = null, ?string $column = null
+?Carbon $date = null,
+?string $column = null,
+?DateRangeType $dateRangeType = null
 
 // basic usage
-Order::weekToDate(); // select * from `orders` where date(`created_at`) >= '2023-04-10' and date(`created_at`) <= '2023-04-14'
+Order::weekToDate(); // select * from `orders` where date(`orders`.`created_at`) >= '2023-05-08' and date(`orders`.`created_at`) <= '2023-05-08'
 // basic usage on a custom column
-Order::weekToDate(column: 'date'); // select * from `orders` where date(`date`) >= '2023-04-10' and date(`date`) <= '2023-04-14'
+Order::weekToDate(column: 'date'); // select * from `orders` where date(`orders`.`date`) >= '2023-05-08' and date(`orders`.`date`) <= '2023-05-08'
 // or you can pass a Carbon instance for a custom date
-Order::weekToDate(now()->subYear(), 'date'); // select * from `orders` where date(`date`) >= '2022-04-11' and date(`date`) <= '2022-04-14'
+Order::weekToDate(now()->subYear(), 'date'); // select * from `orders` where date(`orders`.`date`) >= '2022-05-02' and date(`orders`.`date`) <= '2022-05-08'
 ```
 
 #### LAST
@@ -87,11 +138,12 @@ Order::weekToDate(now()->subYear(), 'date'); // select * from `orders` where dat
 - `lastYear`
 ```php
 // all last methods accept the following parameters
-EloquentBuilder|QueryBuilder $builder, ?string $column = null
+?string $column = null,
+?DateRangeType $dateRangeType = null
 
-Order::lastHour(); // select * from `orders` where `created_at` >= '2023-04-13 23:46:45' and `created_at` <= '2023-04-14 00:46:45'
-Order::lastMonth(); // select * from `orders` where date(`created_at`) >= '2023-03-01' and date(`created_at`) <= '2023-03-31'
-Order::lastQuarter(); // select * from `orders` where date(`created_at`) >= '2023-01-01' and date(`created_at`) <= '2023-03-31'
+Order::lastHour(); // select * from `orders` where `orders`.`created_at` >= '2023-05-08 19:46:38' and `orders`.`created_at` <= '2023-05-08 20:46:38'
+Order::lastMonth(); // select * from `orders` where date(`orders`.`created_at`) >= '2023-04-01' and date(`orders`.`created_at`) <= '2023-04-30'
+Order::lastQuarter(); // select * from `orders` where date(`orders`.`created_at`) >= '2023-01-01' and date(`orders`.`created_at`) <= '2023-03-31'
 ```
 
 #### LAST N
@@ -104,22 +156,30 @@ Order::lastQuarter(); // select * from `orders` where date(`created_at`) >= '202
 - `lastYears` defaults at 2 years
 ```php
 // all last n methods accept the following parameters
-EloquentBuilder|QueryBuilder $builder, int $numberOfMinutes = 5, ?Carbon $date = null, ?string $column = null
+int $numberOfMinutes = 5,
+?Carbon $date = null,
+?string $column = null,
+?DateRangeType $dateRangeType = null
 
 // basic usage
-Order::lastHours(); // select * from `orders` where `created_at` >= '2023-04-13 22:52:37' and `created_at` <= '2023-04-14 00:52:37'
-Order::lastMonths(); // select * from `orders` where date(`created_at`) >= '2023-02-14' and date(`created_at`) <= '2023-04-14'
-Order::lastQuarters(); // select * from `orders` where date(`created_at`) >= '2022-10-14' and date(`created_at`) <= '2023-04-14'
+Order::lastHours(); // select * from `orders` where `orders`.`created_at` >= '2023-05-08 13:46:38' and `orders`.`created_at` <= '2023-05-08 20:46:38'
+Order::lastMonths(); // select * from `orders` where `orders`.`created_at` >= '2023-03-08 20:46:38' and `orders`.`created_at` <= '2023-05-08 20:46:38'
+Order::lastQuarters(); // select * from `orders` where `orders`.`created_at` >= '2022-11-08 20:46:38' and `orders`.`created_at` <= '2023-05-08 20:46:38'
 
 // more complex usage
-Order::lastHours(12); // select * from `orders` where `created_at` >= '2023-04-13 13:00:52' and `created_at` <= '2023-04-14 01:00:52'
-Order::lastMonths(6); // select * from `orders` where date(`created_at`) >= '2022-10-14' and date(`created_at`) <= '2023-04-14'
-Order::lastQuarters(3); // select * from `orders` where date(`created_at`) >= '2022-07-14' and date(`created_at`) <= '2023-04-14'
+Order::lastHours(12); // select * from `orders` where `orders`.`created_at` >= '2023-05-08 08:46:38' and `orders`.`created_at` <= '2023-05-08 20:46:38'
+Order::lastMonths(6); // select * from `orders` where `orders`.`created_at` >= '2022-11-08 20:46:38' and `orders`.`created_at` <= '2023-05-08 20:46:38'
+Order::lastQuarters(3); // select * from `orders` where `orders`.`created_at` >= '2022-08-08 20:46:38' and `orders`.`created_at` <= '2023-05-08 20:46:38'
 
 // even more complex usage
-Order::lastHours(12, now()->subYear()); // select * from `orders` where `created_at` >= '2022-04-13 13:03:30' and `created_at` <= '2022-04-14 01:03:30'
-Order::lastMonths(6, now()->subYear()); // select * from `orders` where date(`created_at`) >= '2021-10-14' and date(`created_at`) <= '2022-04-14'
-Order::lastQuarters(3, now()->subYear()); // select * from `orders` where date(`created_at`) >= '2021-07-14' and date(`created_at`) <= '2022-04-14'
+Order::lastHours(12, now()->subYear()); // select * from `orders` where `orders`.`created_at` >= '2022-05-08 08:46:38' and `orders`.`created_at` <= '2022-05-08 20:46:38'
+Order::lastMonths(6, now()->subYear()); // select * from `orders` where `orders`.`created_at` >= '2021-11-08 20:46:38' and `orders`.`created_at` <= '2022-05-08 20:46:38'
+Order::lastQuarters(3, now()->subYear()); // select * from `orders` where `orders`.`created_at` >= '2021-08-08 20:46:38' and `orders`.`created_at` <= '2022-05-08 20:46:38'
+
+// passing a DateRangeType (when DateRangeType::EXCLUSIVE the <= becomes <)
+Order::lastHours(12, now()->subYear(), dateRangeType: DateRangeType::EXCLUSIVE); // select * from `orders` where `orders`.`created_at` >= '2022-05-08 08:46:38' and `orders`.`created_at` < '2022-05-08 20:46:38'
+Order::lastMonths(6, now()->subYear(), dateRangeType: DateRangeType::EXCLUSIVE); // select * from `orders` where `orders`.`created_at` >= '2021-11-08 20:46:38' and `orders`.`created_at` < '2022-05-08 20:46:38'
+Order::lastQuarters(3, now()->subYear(), dateRangeType: DateRangeType::EXCLUSIVE); // select * from `orders` where `orders`.`created_at` >= '2021-08-08 20:46:38' and `orders`.`created_at` < '2022-05-08 20:46:38'
 ```
 
 #### THIS
@@ -129,11 +189,12 @@ Order::lastQuarters(3, now()->subYear()); // select * from `orders` where date(`
 - `thisYear`
 ```php
 // all this methods accept the following parameters
-EloquentBuilder|QueryBuilder $builder, ?string $column = null
+?string $column = null,
+?DateRangeType $dateRangeType = null
 
-Order::thisWeek(); // select * from `orders` where date(`created_at`) >= '2023-04-10' and date(`created_at`) <= '2023-04-16'
-Order::thisMonth(); // select * from `orders` where date(`created_at`) >= '2023-04-01' and date(`created_at`) <= '2023-04-30'
-Order::thisQuarter(); // select * from `orders` where date(`created_at`) >= '2023-04-01' and date(`created_at`) <= '2023-06-30'
+Order::thisWeek(); // select * from `orders` where date(`orders`.`created_at`) >= '2023-05-08' and date(`orders`.`created_at`) <= '2023-05-14'
+Order::thisMonth(); // select * from `orders` where date(`orders`.`created_at`) >= '2023-05-01' and date(`orders`.`created_at`) <= '2023-05-31'
+Order::thisQuarter(); // select * from `orders` where date(`orders`.`created_at`) >= '2023-04-01' and date(`orders`.`created_at`) <= '2023-06-30'
 ```
 
 #### NEXT
@@ -145,11 +206,12 @@ Order::thisQuarter(); // select * from `orders` where date(`created_at`) >= '202
 - `nextYear`
 ```php
 // all next methods accept the following parameters
-EloquentBuilder|QueryBuilder $builder, ?string $column = null
+?string $column = null,
+?DateRangeType $dateRangeType = null
 
-Order::nextHour(); // select * from `orders` where `created_at` >= '2023-04-14 01:55:57' and `created_at` <= '2023-04-14 00:55:57'
-Order::nextMonth(); // select * from `orders` where date(`created_at`) >= '2023-05-01' and date(`created_at`) <= '2023-05-31'
-Order::nextQuarter(); // select * from `orders` where date(`created_at`) >= '2023-07-01' and date(`created_at`) <= '2023-09-30'
+Order::nextHour(); // select * from `orders` where `orders`.`created_at` >= '2023-05-08 20:46:38' and `orders`.`created_at` <= '2023-05-08 21:46:38'
+Order::nextMonth(); // select * from `orders` where date(`orders`.`created_at`) >= '2023-06-01' and date(`orders`.`created_at`) <= '2023-06-30'
+Order::nextQuarter(); // select * from `orders` where date(`orders`.`created_at`) >= '2023-07-01' and date(`orders`.`created_at`) <= '2023-09-30'
 ```
 
 #### NEXT N
@@ -162,22 +224,25 @@ Order::nextQuarter(); // select * from `orders` where date(`created_at`) >= '202
 - `nextYears` defaults at 2 years
 ```php
 // all next n methods accept the following parameters
-EloquentBuilder|QueryBuilder $builder, int $numberOfMinutes = 5, ?Carbon $date = null, ?string $column = null
+int $numberOfMinutes = 5,
+?Carbon $date = null,
+?string $column = null,
+?DateRangeType $dateRangeType = null
 
 // basic usage
-Order::nextHours(); // select * from `orders` where `created_at` >= '2023-04-14 02:57:23' and `created_at` <= '2023-04-14 00:57:23'
-Order::nextMonths(); // select * from `orders` where date(`created_at`) >= '2023-04-14' and date(`created_at`) <= '2023-06-14'
-Order::nextQuarters(); // select * from `orders` where date(`created_at`) >= '2023-04-14' and date(`created_at`) <= '2023-10-14'
+Order::nextHours(); // select * from `orders` where `orders`.`created_at` >= '2023-05-08 20:46:38' and `orders`.`created_at` <= '2023-05-09 03:46:38'
+Order::nextMonths(); // select * from `orders` where `orders`.`created_at` >= '2023-05-08 20:46:38' and `orders`.`created_at` <= '2023-07-08 20:46:38'
+Order::nextQuarters(); // select * from `orders` where `orders`.`created_at` >= '2023-05-08 20:46:38' and `orders`.`created_at` <= '2023-11-08 20:46:38'
 
 // more complex usage
-Order::nextHours(12); // select * from `orders` where `created_at` >= '2023-04-14 13:06:52' and `created_at` <= '2023-04-14 01:06:52'
-Order::nextMonths(6); // select * from `orders` where date(`created_at`) >= '2023-04-14' and date(`created_at`) <= '2023-10-14'
-Order::nextQuarters(3); // select * from `orders` where date(`created_at`) >= '2023-04-14' and date(`created_at`) <= '2024-01-14'
+Order::nextHours(12); // select * from `orders` where `orders`.`created_at` >= '2023-05-08 20:46:38' and `orders`.`created_at` <= '2023-05-09 08:46:38'
+Order::nextMonths(6); // select * from `orders` where `orders`.`created_at` >= '2023-05-08 20:46:38' and `orders`.`created_at` <= '2023-11-08 20:46:38'
+Order::nextQuarters(3); // select * from `orders` where `orders`.`created_at` >= '2023-05-08 20:46:38' and `orders`.`created_at` <= '2024-02-08 20:46:38'
 
 // even more complex usage
-Order::nextHours(12, now()->subYear()); // select * from `orders` where `created_at` >= '2022-04-14 13:07:19' and `created_at` <= '2022-04-14 01:07:19'
-Order::nextMonths(6, now()->subYear()); // select * from `orders` where date(`created_at`) >= '2022-04-14' and date(`created_at`) <= '2022-10-14'
-Order::nextQuarters(3, now()->subYear()); // select * from `orders` where date(`created_at`) >= '2022-04-14' and date(`created_at`) <= '2023-01-14'
+Order::nextHours(12, now()->subYear()); // select * from `orders` where `orders`.`created_at` >= '2022-05-08 20:46:38' and `orders`.`created_at` <= '2022-05-09 08:46:38'
+Order::nextMonths(6, now()->subYear()); // select * from `orders` where `orders`.`created_at` >= '2022-05-08 20:46:38' and `orders`.`created_at` <= '2022-11-08 20:46:38'
+Order::nextQuarters(3, now()->subYear()); // select * from `orders` where `orders`.`created_at` >= '2022-05-08 20:46:38' and `orders`.`created_at` <= '2023-02-08 20:46:38'
 ```
 
 ## Testing

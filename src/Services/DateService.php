@@ -361,7 +361,7 @@ class DateService
         return $builder
             ->whereDate(
                 $table . $column,
-                $dateRangeType === DateRangeType::INCLUSIVE ? '>=' : '>=',
+                '>=',
                 $date->clone()->$startOfType()
             )
             ->whereDate(
