@@ -19,4 +19,13 @@ return [
      * If you decide to not use the macros, this package provides also a trait that you can use on a specific model.
      */
     'register_macros' => true,
+
+    /**
+     * When using Eloquent the package will use the CREATED_AT column
+     *
+     * @link https://laravel.com/docs/10.x/eloquent#timestamps
+     *
+     * When using Query Builder it uses the column below
+     */
+    'column' => 'created_at',
 ];

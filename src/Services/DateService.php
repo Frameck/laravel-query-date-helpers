@@ -11,36 +11,35 @@ class DateService
 {
     public static function yesterday(EloquentBuilder|QueryBuilder $builder, ?string $column = null): EloquentBuilder|QueryBuilder
     {
-        if (! $column) {
-            $column = static::getCreatedAtColumn($builder);
-        }
-
-        return $builder->whereDate($column, now()->yesterday());
+        return $builder->whereDate(
+            $column ?? static::getCreatedAtColumn($builder),
+            now()->yesterday()
+        );
     }
 
     public static function today(EloquentBuilder|QueryBuilder $builder, ?string $column = null): EloquentBuilder|QueryBuilder
     {
-        if (! $column) {
+        if (!$column) {
             $column = static::getCreatedAtColumn($builder);
         }
 
-        return $builder->whereDate($column, now());
+        return $builder->whereDate(
+            $column ?? static::getCreatedAtColumn($builder),
+            now()
+        );
     }
 
     public static function tomorrow(EloquentBuilder|QueryBuilder $builder, ?string $column = null): EloquentBuilder|QueryBuilder
     {
-        if (! $column) {
-            $column = static::getCreatedAtColumn($builder);
-        }
-
-        return $builder->whereDate($column, now()->tomorrow());
+        return $builder->whereDate(
+            $column ?? static::getCreatedAtColumn($builder),
+            now()->tomorrow()
+        );
     }
 
     public static function betweenDates(EloquentBuilder|QueryBuilder $builder, ?Carbon $dateStart = null, ?Carbon $dateEnd = null, ?string $column = null, ?DateRangeType $dateRangeType = null): EloquentBuilder|QueryBuilder
     {
-        if (! $column) {
-            $column = static::getCreatedAtColumn($builder);
-        }
+        $column ??= static::getCreatedAtColumn($builder);
 
         $rangeType = $dateRangeType ?? config('query-date-helpers.date_range_type', DateRangeType::INCLUSIVE);
 
@@ -314,51 +313,45 @@ class DateService
     }
 
     // HELPER METHODS
-    protected static function getCreatedAtColumn(EloquentBuilder|QueryBuilder $builder): string
+    private static function getCreatedAtColumn(EloquentBuilder|QueryBuilder $builder): string
     {
-        if (! method_exists($builder, 'getModel')) {
-            return 'created_at';
+        $defaultColumn = config('query-date-helpers.column', 'created_at');
+
+        if (!method_exists($builder, 'getModel')) {
+            return $defaultColumn;
         }
 
-        return $builder->getModel()->getCreatedAtColumn() ?? 'created_at';
+        return $builder->getModel()->getCreatedAtColumn() ?? $defaultColumn;
     }
 
     private static function toDate(string $type, EloquentBuilder|QueryBuilder $builder, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null): EloquentBuilder|QueryBuilder
     {
-        if (! $date) {
-            $date = now();
-        }
+        $date ??= now();
 
-        if (! $column) {
-            $column = static::getCreatedAtColumn($builder);
-        }
+        $column ??= static::getCreatedAtColumn($builder);
 
-        $startOfType = 'startOf'.ucfirst($type);
+        $startOfType = 'startOf' . ucfirst($type);
 
-        $rangeType = $dateRangeType ?? config('query-date-helpers.date_range_type', DateRangeType::INCLUSIVE);
+        $dateRangeType ??= config('query-date-helpers.date_range_type', DateRangeType::INCLUSIVE);
 
         return $builder
             ->whereDate(
                 $column,
-                $rangeType === DateRangeType::INCLUSIVE ? '>=' : '>=',
+                $dateRangeType === DateRangeType::INCLUSIVE ? '>=' : '>=',
                 $date->clone()->$startOfType()
             )
             ->whereDate(
                 $column,
-                $rangeType === DateRangeType::INCLUSIVE ? '<=' : '<',
+                $dateRangeType === DateRangeType::INCLUSIVE ? '<=' : '<',
                 $date
             );
     }
 
     private static function applySubOrAddContraints(string $operationType, string $unitType, EloquentBuilder|QueryBuilder $builder, int $number, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null): EloquentBuilder|QueryBuilder
     {
-        if (! $date) {
-            $date = now();
-        }
+        $date ??= now();
 
-        if (! $column) {
-            $column = static::getCreatedAtColumn($builder);
-        }
+        $column ??= static::getCreatedAtColumn($builder);
 
         $config = match ($unitType) {
             'minutes' => [
@@ -391,9 +384,9 @@ class DateService
             ],
         };
 
-        $method = $operationType.ucfirst($config[$operationType]);
+        $method = $operationType . ucfirst($config[$operationType]);
 
-        $rangeType = $dateRangeType ?? config('query-date-helpers.date_range_type', DateRangeType::INCLUSIVE);
+        $dateRangeType ??= config('query-date-helpers.date_range_type', DateRangeType::INCLUSIVE);
 
         return $builder
             ->when(
@@ -407,7 +400,7 @@ class DateService
                         )
                         ->where(
                             $column,
-                            $rangeType === DateRangeType::INCLUSIVE ? '<=' : '<',
+                            $dateRangeType === DateRangeType::INCLUSIVE ? '<=' : '<',
                             $date
                         )
                 ),
@@ -420,7 +413,7 @@ class DateService
                         )
                         ->where(
                             $column,
-                            $rangeType === DateRangeType::INCLUSIVE ? '<=' : '<',
+                            $dateRangeType === DateRangeType::INCLUSIVE ? '<=' : '<',
                             $date->clone()->$method($number)
                         )
                 )
