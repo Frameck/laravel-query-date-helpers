@@ -8,56 +8,56 @@ use Frameck\LaravelQueryDateHelpers\Services\DateService;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @method static Builder yesterday(Builder $builder, ?string $column = null)
- * @method static Builder today(Builder $builder, ?string $column = null)
- * @method static Builder tomorrow(Builder $builder, ?string $column = null)
- * @method static Builder betweenDates(Builder $builder, ?Carbon $dateStart = null, ?Carbon $dateEnd = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder yesterday(?string $column = null)
+ * @method static Builder today(?string $column = null)
+ * @method static Builder tomorrow(?string $column = null)
+ * @method static Builder betweenDates(?Carbon $dateStart = null, ?Carbon $dateEnd = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
  *
  * TO DATE METHODS
- * @method static Builder weekToDate(Builder $builder, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder monthToDate(Builder $builder, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder quarterToDate(Builder $builder, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder yearToDate(Builder $builder, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder weekToDate(?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder monthToDate(?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder quarterToDate(?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder yearToDate(?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
  *
  * LAST METHODS
- * @method static Builder lastMinute(Builder $builder, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder lastHour(Builder $builder, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder lastWeek(Builder $builder, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder lastMonth(Builder $builder, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder lastQuarter(Builder $builder, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder lastYear(Builder $builder, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder lastMinute(?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder lastHour(?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder lastWeek(?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder lastMonth(?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder lastQuarter(?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder lastYear(?string $column = null, ?DateRangeType $dateRangeType = null)
  *
  * LAST N METHODS
- * @method static Builder lastMinutes(Builder $builder, int $numberOfMinutes = 5, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder lastHours(Builder $builder, int $numberOfHours = 2, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder lastDays(Builder $builder, int $numberOfDays = 7, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder lastWeeks(Builder $builder, int $numberOfWeeks = 2, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder lastMonths(Builder $builder, int $numberOfMonths = 2, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder lastQuarters(Builder $builder, int $numberOfQuarters = 2, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder lastYears(Builder $builder, int $numberOfYears = 2, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder lastMinutes(int $numberOfMinutes = 5, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder lastHours(int $numberOfHours = 2, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder lastDays(int $numberOfDays = 7, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder lastWeeks(int $numberOfWeeks = 2, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder lastMonths(int $numberOfMonths = 2, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder lastQuarters(int $numberOfQuarters = 2, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder lastYears(int $numberOfYears = 2, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
  *
  * THIS METHODS
- * @method static Builder thisWeek(Builder $builder, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder thisMonth(Builder $builder, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder thisQuarter(Builder $builder, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder thisYear(Builder $builder, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder thisWeek(?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder thisMonth(?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder thisQuarter(?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder thisYear(?string $column = null, ?DateRangeType $dateRangeType = null)
  *
  * NEXT METHODS
- * @method static Builder nextMinute(Builder $builder, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder nextHour(Builder $builder, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder nextWeek(Builder $builder, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder nextMonth(Builder $builder, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder nextQuarter(Builder $builder, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder nextYear(Builder $builder, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder nextMinute(?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder nextHour(?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder nextWeek(?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder nextMonth(?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder nextQuarter(?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder nextYear(?string $column = null, ?DateRangeType $dateRangeType = null)
  *
  * NEXT N METHODS
- * @method static Builder nextMinutes(Builder $builder, int $numberOfMinutes = 5, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder nextHours(Builder $builder, int $numberOfHours = 2, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder nextDays(Builder $builder, int $numberOfDays = 7, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder nextWeeks(Builder $builder, int $numberOfWeeks = 2, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder nextMonths(Builder $builder, int $numberOfMonths = 2, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder nextQuarters(Builder $builder, int $numberOfQuarters = 2, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
- * @method static Builder nextYears(Builder $builder, int $numberOfYears = 2, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder nextMinutes(int $numberOfMinutes = 5, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder nextHours(int $numberOfHours = 2, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder nextDays(int $numberOfDays = 7, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder nextWeeks(int $numberOfWeeks = 2, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder nextMonths(int $numberOfMonths = 2, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder nextQuarters(int $numberOfQuarters = 2, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
+ * @method static Builder nextYears(int $numberOfYears = 2, ?Carbon $date = null, ?string $column = null, ?DateRangeType $dateRangeType = null)
  */
 trait HasDateScopes
 {
