@@ -2,6 +2,12 @@
 
 All notable changes to `laravel-query-date-helpers` will be documented in this file.
 
+## v1.0.1 - 2023-05-08
+
+**Full Changelog**: https://github.com/Frameck/laravel-query-date-helpers/compare/v1.0.0...v1.0.1
+
+updated docs
+
 ## v1.0.0 - 2023-05-08
 
 **Full Changelog**: https://github.com/Frameck/laravel-query-date-helpers/compare/v0.0.2...v1.0.0
